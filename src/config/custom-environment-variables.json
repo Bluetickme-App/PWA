@@ -1,0 +1,14 @@
+{
+    "app": {
+        "port": "HOST"
+    },
+    "vapid": {
+        "subject": "VAPID_SUBJECT",
+        "public_key": "VAPID_PUBLIC_KEY",
+        "private_key": "VAPID_PRIVATE_KEY"
+    },
+    "gcm": {
+        "api_key": "GCM_API_KEY"
+    },
+    "manifest_start_url": "MANIFEST_START_URL"
+}

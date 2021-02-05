@@ -1,0 +1,14 @@
+{
+    "app": {
+        "port": 3000
+    },
+    "vapid": {
+        "subject": "",
+        "public_key": "",
+        "private_key": ""
+    },
+    "gcm": {
+        "api_key": ""
+    },
+    "manifest_start_url": ""
+}

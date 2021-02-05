@@ -1,0 +1,23 @@
+{
+  "name": "web_push_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "shx cp ./package.json ./dist/ && shx cp ./package-lock.json ./dist/ && shx cp -rf ./src/* ./dist/ && cd dist && npm install",
+    "start": "export NODE_EVN=production && cd dist && nodemon index.js",
+    "start:dev": "export NODE_EVN=development && cd src && nodemon --watch ../src index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "config": "^3.3.3",
+    "express": "^4.17.1",
+    "shx": "^0.3.3",
+    "web-push": "^3.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
