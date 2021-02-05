@@ -1,6 +1,6 @@
 {
     "app": {
-        "port": "HOST"
+        "port": "PORT"
     },
     "vapid": {
         "subject": "VAPID_SUBJECT",
