@@ -6,7 +6,7 @@ function renderNotificationPermissionPopup() {
     let closedByUser = false;
     let allowedNotification = false;
     const pushPermissionSite = 'http://localhost:3000';
-    const logoImage = 'http://localhost:3000/images/logo.png';
+    const logoImage = 'http://localhost:3000/images/logo.jpg';
     const title = "Bluetickme, want to send you notifications, do you agree?";
     const agreeButtonText = "Agree";
     const isMobile = isMobileAgent();

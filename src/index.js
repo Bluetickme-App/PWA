@@ -3,6 +3,8 @@ const webPush = require('web-push');
 const app = express();
 const bodyParser = require('body-parser');
 const config = require('config');
+const Promise = require('bluebird');
+
 const port = config.get('app.port');
 const manifestJSON = require('./public/manifest.json');
 
@@ -10,6 +12,7 @@ const manifestJSON = require('./public/manifest.json');
 // console.log(vapidKeys);
 
 let subscription = null;
+const WEB_PUSH_TTL = 60;
 
 const vapid_subject = config.get('vapid.subject');
 const vapid_public_key = config.get('vapid.public_key');
@@ -44,13 +47,52 @@ app.get('/api/vapid-public-key', function (req, res) {
 
 app.post('/api/web-push-register', function (req, res) {
     subscription = req.body.subscription;
+    console.log(subscription);
     res.sendStatus(201);
+});
+
+app.post('/api/notifications/send', async function (req, res) {
+    const responses = [];
+
+    const options = {
+        TTL: WEB_PUSH_TTL,
+    };
+    const notifications = req.body.notifications;
+
+    await Promise.each(notifications, async (notification) => {
+        const response = {
+            subscription_id: null,
+            success: false,
+            error: null,
+        };
+
+        const {
+            subscription,
+            payload,
+        } = notification;
+
+        response.subscription_id = subscription.id;
+
+        try {
+            await webPush.sendNotification(subscription, payload, options);
+            response.success = true;
+        } catch (error) {
+            response.error = error.message;
+        }
+
+        responses.push(response);
+    });
+
+    res.header('Content-Type', 'application/json');
+    res.send({
+        data: responses,
+    });
 });
 
 app.get('/api/notifications', function (req, res) {
     const payload = 'Hi';
     const options = {
-        TTL: 5
+        TTL: WEB_PUSH_TTL,
     };
     webPush.sendNotification(subscription, payload, options)
         .then(function (response) {
