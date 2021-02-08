@@ -1,5 +1,3 @@
-navigator.serviceWorker.register('/service_worker.js');
-
 /**
  * urlBase64ToUint8Array
  *
@@ -20,41 +18,54 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-navigator.serviceWorker.ready
-    .then(function (registration) {
-        console.log(registration);
+if ('serviceWorker' in navigator) {
 
-        return registration.pushManager.getSubscription()
-            .then(async function (subscription) {
-                if (subscription) {
-                    console.log('got subscription!', subscription)
-                    return subscription;
-                }
-                const response = await fetch('/api/vapid-public-key');
-                console.log(response);
-                const jsonResponse = JSON.parse(await response.text());
-                const vapidPublicKey = jsonResponse.vapid_public_key;
-                console.log('decoding:', vapidPublicKey);
-                const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-                console.log('got vapidPublicKey', vapidPublicKey, convertedVapidKey)
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service_worker.js').then(registration => {
+            registration.onupdatefound = () => {
+                const installingWorker = registration.installing;
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Preferably, display a message asking the user to reload...
+                        registration.update().then(() => {});
+                    }
+                };
+            };
+        });
 
-                return registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: convertedVapidKey
+        navigator.serviceWorker.ready
+            .then(function (registration) {
+
+                return registration.pushManager.getSubscription()
+                    .then(async function (subscription) {
+                        if (subscription) {
+                            return subscription;
+                        }
+
+                        const response = await fetch('/api/vapid-public-key');
+                        const jsonResponse = JSON.parse(await response.text());
+                        const vapidPublicKey = jsonResponse.vapid_public_key;
+                        const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+
+                        return registration.pushManager.subscribe({
+                            userVisibleOnly: true,
+                            applicationServerKey: convertedVapidKey
+                        });
+                    });
+
+            }).then(function (subscription) {
+                console.log('register!', subscription)
+                fetch('/api/web-push-register', {
+                    method: 'post',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        subscription: subscription
+                    }),
+                }).then(() => {
+                    // window.close();
                 });
             });
-
-    }).then(function (subscription) {
-        console.log('register!', subscription)
-        fetch('/api/web-push-register', {
-            method: 'post',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({
-                subscription: subscription
-            }),
-        }).then(() => {
-            window.close();
-        });
     });
+}

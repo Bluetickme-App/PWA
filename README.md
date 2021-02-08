@@ -19,3 +19,43 @@
 6. Run `pm2 start dist/index.js`
 7. Add nginx routing to node server.
 8. Test.
+
+## How to call push send api
+1. API `POST /api/notifications/send`
+2. Required Header `X-Bluetickme`. This should be configured on push server as well.
+3. Request Body
+
+```json
+{
+    "notifications": [
+        {
+            "subscription": {
+                "id": "",
+                "endpoint": "",
+                "expiration_time": "",
+                "p256dh_key": "",
+                "auth_key": ""
+            },
+            "payload": {
+                "title": "",
+                "options": {
+                    "body": "",
+                    "icon": "http://localhost:3000/images/icons/icon-144x144.png",
+                    "image": "http://localhost:3000/images/icons/icon-72x72.png",
+                    "badge": "http://localhost:3000/images/icons/icon-72x72.png",
+                    "lang": "",
+                    "data": {},
+                    "tag": "", // A unique id
+                    "silent": false,
+                    "vibrate": [200, 100, 200, 100, 200, 100, 200],
+                    "renotify": true
+                }
+            }
+        }
+    ]
+}
+```
+
+* See [here](https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorkerRegistration/showNotification) to know more about `notification.payload` fields.
+
+4. Limit - As of right now there is no limit on sending web push.

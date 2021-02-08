@@ -10,5 +10,8 @@
     "gcm": {
         "api_key": ""
     },
-    "manifest_start_url": ""
+    "manifest_start_url": "",
+    "wix": {
+        "token": ""
+    }
 }
