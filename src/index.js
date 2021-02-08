@@ -32,6 +32,7 @@ webPush.setVapidDetails(
 const ctx = {
     httpAgents: {
         blueTickMeAgent: new HttpAgent('https://www.bluetickme.com/_functions', {
+            'Content-Type': 'application/json',
             'X-Bluetickme': config.get('wix.token'),
         }),
     },
@@ -65,12 +66,7 @@ app.post('/api/web-push-register', async function (req, res) {
     try {
         await subscriptionService.storeSubscription({
             user_id: null,
-            endpoint: subscription.endpoint,
-            expiration_time: subscription.expirationTime,
-            p256dh_key: subscription.keys.p256dh,
-            auth_key: subscription.keys.auth,
-            updated_at: Date.now(),
-            created_at: Date.now(),
+            subscription,
             status: 'active',
         });
     } catch(error) {
@@ -101,14 +97,7 @@ app.post('/api/notifications/send', checkHeader, async function (req, res) {
         } = notification;
 
         response.subscription_id = subscription.id;
-        const pushSubscription = {
-            endpoint: subscription.endpoint,
-            expirationTime: subscription.expiration_time,
-            keys: {
-              p256dh: subscription.p256dh_key,
-              auth: subscription.auth_key,
-            }
-        };
+        const pushSubscription = subscription.subscription;
 
         try {
             await webPush.sendNotification(pushSubscription, JSON.stringify(payload), options);

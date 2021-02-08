@@ -31,10 +31,14 @@
         {
             "subscription": {
                 "id": "",
-                "endpoint": "",
-                "expiration_time": "",
-                "p256dh_key": "",
-                "auth_key": ""
+                "subscription": {
+                    "endpoint": "",
+                    "expirationTime": "",
+                    "keys": {
+                        "p256dh": "",
+                        "auth": ""
+                    }
+                }
             },
             "payload": {
                 "title": "",
