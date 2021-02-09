@@ -34,6 +34,7 @@ function renderNotificationPermissionPopup() {
     rootElem.style.width = "100%";
     rootElem.style.backgroundColor = "#ffffff";
     rootElem.style.borderBottom = "1px solid #dedede";
+    rootElem.style.zIndex = 100;
 
     const rootContainer = document.createElement("div");
     rootContainer.style.maxWidth = "991px";
@@ -81,6 +82,7 @@ function renderNotificationPermissionPopup() {
     const titleElemSpanContainer = document.createElement("span");
     titleElemSpanContainer.style.marginTop = "32px";
     titleElemSpanContainer.style.marginLeft = "32px";
+    titleElemSpanContainer.style.fontSize = "14px";
     titleElemSpanContainer.style.display = "inline-block";
     titleElemSpanContainer.appendChild(titleElem);
     const titleElemContainer = document.createElement("div");
