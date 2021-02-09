@@ -16,7 +16,6 @@ const manifestJSON = require('./public/manifest.json');
 // const vapidKeys = webPush.generateVAPIDKeys();
 // console.log(vapidKeys);
 
-let subscription = null;
 const WEB_PUSH_TTL = 60;
 
 const vapid_subject = config.get('vapid.subject');
@@ -41,37 +40,11 @@ const ctx = {
 
 const subscriptionService = new SubscriptionService(ctx);
 
-app.use(cors());
-app.use(function (req, res, next) {
-
-    // Website you wish to allow to connect
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.bluetickme.com');
-
-    // Request methods you wish to allow
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-
-    // Request headers you wish to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-
-    // Set to true if you need the website to include cookies in the requests sent
-    // to the API (e.g. in case you use sessions)
-    res.setHeader('Access-Control-Allow-Credentials', true);
-
-    // Pass to next layer of middleware
-    next();
-});
+app.use(cors({
+    origin: '*',
+}));
 
 app.use(bodyParser.json());
-
-app.get('/manifest.json', function (req, res) {
-    const url = config.get('manifest_start_url');
-    const manifestObject = Object.assign({}, manifestJSON, {
-        scope: url,
-        start_url: url,
-    })
-    res.header('Content-Type', 'application/json');
-    res.send(manifestObject);
-});
 
 app.get('/api/vapid-public-key', function (req, res) {
     res.header('Content-Type', 'application/json');
