@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const config = require('config');
 const Promise = require('bluebird');
+const cors = require('cors');
 
 const {HttpAgent} = require('./helpers');
 const {SubscriptionService} = require('./services');
@@ -40,6 +41,7 @@ const ctx = {
 
 const subscriptionService = new SubscriptionService(ctx);
 
+app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/manifest.json', function (req, res) {
