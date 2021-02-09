@@ -55,19 +55,19 @@ app.get('/api/vapid-public-key', function (req, res) {
 
 app.post('/api/web-push-register', async function (req, res) {
     const subscription = req.body.subscription;
-    console.log(subscription);
-
     try {
-        await subscriptionService.storeSubscription({
+        const response = await subscriptionService.storeSubscription({
             user_id: null,
             subscription,
             status: 'active',
         });
+        res.header('Content-Type', 'application/json');
+        res.send({
+            data: response,
+        });
     } catch(error) {
-        console.log(error);
+        throw error;
     }
-
-    res.sendStatus(201);
 });
 
 app.post('/api/notifications/send', checkHeader, async function (req, res) {

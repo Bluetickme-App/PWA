@@ -63,8 +63,11 @@ if ('serviceWorker' in navigator) {
                     body: JSON.stringify({
                         subscription: subscription
                     }),
-                }).then(() => {
+                }).then((response) => {
+                    console.log(response);
                     window.close();
+                }).catch(error => {
+                    console.log(error);
                 });
             });
     });
