@@ -1,3 +1,5 @@
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const webPush = require('web-push');
 const app = express();
@@ -5,13 +7,13 @@ const bodyParser = require('body-parser');
 const config = require('config');
 const Promise = require('bluebird');
 const cors = require('cors');
+const morgan = require('morgan');
 
-const {HttpAgent} = require('./helpers');
+const {HttpAgent, logger} = require('./helpers');
 const {SubscriptionService} = require('./services');
 const {checkHeader} = require('./middlewares');
 
 const port = config.get('app.port');
-const manifestJSON = require('./public/manifest.json');
 
 // const vapidKeys = webPush.generateVAPIDKeys();
 // console.log(vapidKeys);
@@ -40,6 +42,11 @@ const ctx = {
 
 const subscriptionService = new SubscriptionService(ctx);
 
+// Create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/requests.log'), {flags: 'a'});
+// Setup the logger
+app.use(morgan('combined', {stream: accessLogStream}));
+
 app.use(cors({
     origin: '*',
 }));
@@ -55,6 +62,9 @@ app.get('/api/vapid-public-key', function (req, res) {
 
 app.post('/api/web-push-register', async function (req, res) {
     const subscription = req.body.subscription;
+    logger.info("web-push-register api request body");
+    logger.info(JSON.stringify(subscription));
+
     try {
         const response = await subscriptionService.storeSubscription({
             user_id: null,
@@ -65,7 +75,12 @@ app.post('/api/web-push-register', async function (req, res) {
         res.send({
             data: response,
         });
+
+        logger.info("web-push-register api response");
+        logger.info(JSON.stringify(response));
     } catch(error) {
+        logger.error("web-push-register api error");
+        logger.error(JSON.stringify(error));
         throw error;
     }
 });
@@ -77,6 +92,8 @@ app.post('/api/notifications/send', checkHeader, async function (req, res) {
         TTL: WEB_PUSH_TTL,
     };
     const notifications = req.body.notifications;
+    logger.info("notifications-send api request body");
+    logger.info(JSON.stringify(req.body));
 
     await Promise.each(notifications, async (notification) => {
         const response = {
@@ -97,7 +114,8 @@ app.post('/api/notifications/send', checkHeader, async function (req, res) {
             await webPush.sendNotification(pushSubscription, JSON.stringify(payload), options);
             response.success = true;
         } catch (error) {
-            console.log(error);
+            logger.error(`notifications-send api request processing error for subscription - ${response.subscription_id}`);
+            logger.error(JSON.stringify(error));
             response.error = error.message;
         }
 
@@ -108,6 +126,9 @@ app.post('/api/notifications/send', checkHeader, async function (req, res) {
     res.send({
         data: responses,
     });
+
+    logger.info("notifications-send api request response");
+    logger.info(JSON.stringify(responses));
 });
 
 app.use(express.static('public'));

@@ -1,5 +1,4 @@
-const HttpAgent = require('./http-agent');
-
 module.exports = {
-    HttpAgent,
+    HttpAgent: require('./http-agent'),
+    logger: require('./logger'),
 };
