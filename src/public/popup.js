@@ -7,11 +7,24 @@ function renderNotificationPermissionPopup() {
     let allowedNotification = false;
     const pushPermissionSite = 'https://api.bluetickme.com';
     const logoImage = 'https://api.bluetickme.com/images/logo.jpg';
-    const title = "Bluetickme, want to send you notifications, do you agree?";
+    const title = "Bluetickme, wants to send you notifications, do you agree?";
     const agreeButtonText = "Agree";
     const isMobile = isMobileAgent();
     const windowWidth = window.innerWidth;
-    let resolutionType = 'desktop'; // tablet, mobile
+    const RES = {
+        mobile: 'mobile',
+        tablet: 'tablet',
+        desktop: 'desktop',
+    };
+
+    let resolutionType; // tablet, mobile
+    if (windowWidth < 786) {
+        resolutionType = RES.mobile;
+    } else if (windowWidth >= 768 && windowWidth < 992) {
+        resolutionType = RES.tablet;
+    } else {
+        resolutionType = RES.desktop;
+    }
 
     if (allowedNotification) {
         return;
@@ -39,7 +52,13 @@ function renderNotificationPermissionPopup() {
     const rootContainer = document.createElement("div");
     rootContainer.style.maxWidth = "991px";
     rootContainer.style.position = "relative";
-    rootContainer.style.margin = "auto";
+    if (resolutionType === RES.mobile) {
+        rootContainer.style.margin = "0 10px";
+    } else if (resolutionType === RES.tablet) {
+        rootContainer.style.margin = "0 20px";
+    } else {
+        rootContainer.style.margin = "auto";
+    }
 
     const agreeButtonElem = document.createElement("button");
     agreeButtonElem.innerHTML = agreeButtonText;
@@ -82,6 +101,13 @@ function renderNotificationPermissionPopup() {
     const titleElemSpanContainer = document.createElement("span");
     titleElemSpanContainer.style.marginTop = "32px";
     titleElemSpanContainer.style.marginLeft = "32px";
+    if (resolutionType === RES.mobile) {
+        titleElemSpanContainer.style.marginTop = "25px";
+        titleElemSpanContainer.style.marginLeft = "12px";
+        titleElemSpanContainer.style.maxWidth = "250px";
+    } else {
+        titleElemSpanContainer.style.marginLeft = "32px";
+    }
     titleElemSpanContainer.style.fontSize = "14px";
     titleElemSpanContainer.style.display = "inline-block";
     titleElemSpanContainer.appendChild(titleElem);
