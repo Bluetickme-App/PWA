@@ -64,7 +64,7 @@ if ('serviceWorker' in navigator) {
                         subscription: subscription
                     }),
                 }).then(() => {
-                    // window.close();
+                    window.close();
                 });
             });
     });
