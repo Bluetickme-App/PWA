@@ -1,0 +1,18 @@
+runtime: nodejs12
+
+instance_class: F2
+
+env_variables:
+  GCM_API_KEY: "BCDJRDfN-y6XLztyFg7o067_15AbUZD93qL5q5xwoZU7Weta2WMxVEqdTScTyCqK5gS9-TFqGotuQjuWMaRIvww"
+  MANIFEST_START_URL: "https://www.bluetickeme.com"
+  PORT: 3000
+  VAPID_PRIVATE_KEY: "Y2V380JhM58pN25kCLYK7VAavYtWTbJljL6FA1ZYkPA"
+  VAPID_PUBLIC_KEY: "BHeRQ3yRAe9wSQTHkqhgZlWJt1fb9DjRFV0MMUBr86Bf6o8X_oz1t_bdYO_xvpoNwl1zQsXMCdFclMiABMcpBmQ"
+  VAPID_SUBJECT: "https://www.bluetickeme.com"
+  WIX_TOKEN: "1794cbb0-0583-4dbc-9223-aabc4b4b108c"
+
+handlers:
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
