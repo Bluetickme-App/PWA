@@ -1,141 +1,213 @@
-function isMobileAgent() {
-    return window.navigator.userAgent.toLowerCase().indexOf("mobil") > -1;
-}
-
-function renderNotificationPermissionPopup() {
-    let closedByUser = false;
-    let allowedNotification = false;
-    const pushPermissionSite = 'https://api.bluetickme.com';
-    const logoImage = 'https://api.bluetickme.com/images/logo.jpg';
-    const title = "Bluetickme, wants to send you notifications, do you agree?";
-    const agreeButtonText = "Agree";
-    const isMobile = isMobileAgent();
-    const windowWidth = window.innerWidth;
-    const RES = {
-        mobile: 'mobile',
-        tablet: 'tablet',
-        desktop: 'desktop',
-    };
-
-    let resolutionType; // tablet, mobile
-    if (windowWidth < 786) {
-        resolutionType = RES.mobile;
-    } else if (windowWidth >= 768 && windowWidth < 992) {
-        resolutionType = RES.tablet;
-    } else {
-        resolutionType = RES.desktop;
+(() => {
+    function addCssToDocument(css){
+        var style = document.createElement('style')
+        style.innerText = css
+        document.head.appendChild(style)
     }
 
-    if (allowedNotification) {
-        return;
-    }
-
-    if (closedByUser) {
-        return;
+    function isMobileAgent() {
+        return window.navigator.userAgent.toLowerCase().indexOf("mobil") > -1;
     }
 
     function removeNotificationPopup() {
-        document.getElementById('notification-container').remove();
+        if (document.getElementById('notification-container')) {
+            document.getElementById('notification-container').remove();
+        }
     }
 
-    const rootElem = document.createElement("div");
-    rootElem.id = "notification-container";
-    rootElem.style.position = "fixed";
-    rootElem.style.top = 0;
-    rootElem.style.left = 0;
-    rootElem.style.height = "80px";
-    rootElem.style.width = "100%";
-    rootElem.style.backgroundColor = "#ffffff";
-    rootElem.style.borderBottom = "1px solid #dedede";
-    rootElem.style.zIndex = 100;
+    function renderNotificationPermissionPopup() {
+        let closedByUser = false;
+        let allowedNotification = false;
+        const pushPermissionSite = 'https://api.bluetickme.com';
+        const logoImage = 'https://api.bluetickme.com/images/logo.jpg';
+        const title = "Bluetickme, wants to send you notifications, do you agree?";
+        const agreeButtonText = "Agree";
+        const isMobile = isMobileAgent();
+        const windowWidth = window.innerWidth;
+        const RES = {
+            mobile: 'mobile',
+            tablet: 'tablet',
+            desktop: 'desktop',
+        };
 
-    const rootContainer = document.createElement("div");
-    rootContainer.style.maxWidth = "991px";
-    rootContainer.style.position = "relative";
-    if (resolutionType === RES.mobile) {
-        rootContainer.style.margin = "0 10px";
-    } else if (resolutionType === RES.tablet) {
-        rootContainer.style.margin = "0 20px";
-    } else {
-        rootContainer.style.margin = "auto";
+        let resolutionType; // tablet, mobile
+        if (windowWidth < 786) {
+            resolutionType = RES.mobile;
+        } else if (windowWidth >= 768 && windowWidth < 992) {
+            resolutionType = RES.tablet;
+        } else {
+            resolutionType = RES.desktop;
+        }
+
+        if (allowedNotification) {
+            return;
+        }
+
+        if (closedByUser) {
+            return;
+        }
+
+        const css = `
+        #notification-container {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            height: 80px;
+            width: 100%;
+            background-color: rgb(255, 255, 255);
+            border-bottom: 1px solid rgb(222, 222, 222);
+            z-index: 100;
+        }
+
+        #notification-container .inner-container {
+            max-width: 991px;
+            position: relative;
+            margin: auto;
+        }
+
+        #notification-container .agree-button-container {
+            position: absolute;
+            right: 20px;
+            top: 50px;
+        }
+        #notification-container .agree-button-container button {
+            color: rgb(255, 255, 255);
+            background-color: rgb(0, 138, 252);
+            border: 0px;
+            border-radius: 4px;
+            padding: 4px;
+            width: 100px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        #notification-container .close-button-container {
+            position: absolute;
+            right: 20px;
+            top: 8px;
+        }
+        #notification-container .close-button-container button {
+            border: 0px;
+            cursor: pointer;
+        }
+
+        #notification-container .title-container {
+            display: inline-block;
+            width: calc(100% - 80px);
+            vertical-align: top;
+        }
+        #notification-container .title-container > span {
+            margin-top: 32px;
+            margin-left: 32px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        #notification-container .logo-container {
+            display: inline-block;
+            width: 60px;
+        }
+        #notification-container .logo-container img {
+            width: 60px;
+            height: 60px;
+            margin-top: 10px;
+        }
+
+        @media screen and (max-width: 991px) {
+            #notification-container .inner-container {
+                margin: 0 20px;
+            }
+        }
+
+        @media screen and (max-width: 785px) {
+        }
+
+        @media screen and (max-width: 576px) {
+            #notification-container .inner-container {
+                margin: 0 10px;
+            }
+
+            #notification-container .logo-container {
+                width: 50px;
+            }
+            #notification-container .logo-container img {
+                width: 50px;
+                height: 50px;
+                margin-top: 15px;
+            }
+
+            #notification-container .title-container {
+                width: calc(100% - 170px);
+                max-width: calc(100% - 170px);
+            }
+            #notification-container .title-container span {
+                margin-top: 25px;
+                margin-left: 12px;
+            }
+
+            #notification-container .close-button-container {
+                right: 0px;
+            }
+            #notification-container .agree-button-container {
+                right: 0px;
+            }
+        }
+        `;
+
+        addCssToDocument(css);
+
+        const rootElem = document.createElement("div");
+        rootElem.id = "notification-container";
+
+        const rootContainer = document.createElement("div");
+        rootContainer.classList = 'inner-container';
+
+        const agreeButtonElem = document.createElement("button");
+        agreeButtonElem.innerHTML = agreeButtonText;
+
+        const agreeButtonElemContainer = document.createElement("div");
+        agreeButtonElemContainer.classList = 'agree-button-container';
+        agreeButtonElemContainer.onclick = ((ev) => {
+            removeNotificationPopup();
+            window.open(pushPermissionSite);
+        });
+        agreeButtonElemContainer.appendChild(agreeButtonElem);
+
+        const closeButtonElem = document.createElement("button");
+        closeButtonElem.innerHTML = 'x';
+        closeButtonElem.addEventListener("focus", function () {
+            this.style.border = "0";
+        });
+        const closeButtonElemContainer = document.createElement("div");
+        closeButtonElemContainer.classList = 'close-button-container';
+        closeButtonElemContainer.onclick = ((ev) => {
+            removeNotificationPopup();
+        });
+        closeButtonElemContainer.appendChild(closeButtonElem);
+
+        const titleElem = document.createTextNode(title);
+        const titleElemSpanContainer = document.createElement("span");
+        titleElemSpanContainer.appendChild(titleElem);
+        const titleElemContainer = document.createElement("div");
+        titleElemContainer.classList = 'title-container';
+        titleElemContainer.appendChild(titleElemSpanContainer);
+
+        const logoImageElem = document.createElement("img");
+        logoImageElem.src = logoImage;
+        logoImageElem.alt = 'Bluetickme';
+        const logoElemContainer = document.createElement("div");
+        logoElemContainer.classList = 'logo-container';
+        logoElemContainer.appendChild(logoImageElem);
+
+        rootContainer.append(logoElemContainer);
+        rootContainer.append(titleElemContainer);
+        rootContainer.append(closeButtonElemContainer);
+        rootContainer.append(agreeButtonElemContainer);
+        rootElem.append(rootContainer);
+        document.body.appendChild(rootElem);
     }
 
-    const agreeButtonElem = document.createElement("button");
-    agreeButtonElem.innerHTML = agreeButtonText;
-    agreeButtonElem.style.color = "#fff";
-    agreeButtonElem.style.backgroundColor = "#008AFC";
-    agreeButtonElem.style.border = "0";
-    agreeButtonElem.style.borderRadius = "4px";
-    agreeButtonElem.style.padding = "4px";
-    agreeButtonElem.style.width = "100px";
-    agreeButtonElem.style.height = "25px";
-    agreeButtonElem.style.cursor = "pointer";
-
-    const agreeButtonElemContainer = document.createElement("div");
-    agreeButtonElemContainer.style.position = "absolute";
-    agreeButtonElemContainer.style.right = "20px";
-    agreeButtonElemContainer.style.top = "50px";
-    agreeButtonElemContainer.onclick = ((ev) => {
-        removeNotificationPopup();
-        window.open(pushPermissionSite);
+    document.addEventListener("DOMContentLoaded", function () {
+        renderNotificationPermissionPopup();
     });
-    agreeButtonElemContainer.appendChild(agreeButtonElem);
-
-    const closeButtonElem = document.createElement("button");
-    closeButtonElem.innerHTML = 'x';
-    closeButtonElem.style.border = "0";
-    closeButtonElem.style.cursor = "pointer";
-    closeButtonElem.addEventListener("focus", function () {
-        this.style.border = "0";
-    });
-    const closeButtonElemContainer = document.createElement("div");
-    closeButtonElemContainer.style.position = "absolute";
-    closeButtonElemContainer.style.right = "20px";
-    closeButtonElemContainer.style.top = "8px";
-    closeButtonElemContainer.onclick = ((ev) => {
-        removeNotificationPopup();
-    });
-    closeButtonElemContainer.appendChild(closeButtonElem);
-
-    const titleElem = document.createTextNode(title);
-    const titleElemSpanContainer = document.createElement("span");
-    titleElemSpanContainer.style.marginTop = "32px";
-    titleElemSpanContainer.style.marginLeft = "32px";
-    if (resolutionType === RES.mobile) {
-        titleElemSpanContainer.style.marginTop = "25px";
-        titleElemSpanContainer.style.marginLeft = "12px";
-        titleElemSpanContainer.style.maxWidth = "250px";
-    } else {
-        titleElemSpanContainer.style.marginLeft = "32px";
-    }
-    titleElemSpanContainer.style.fontSize = "14px";
-    titleElemSpanContainer.style.display = "inline-block";
-    titleElemSpanContainer.appendChild(titleElem);
-    const titleElemContainer = document.createElement("div");
-    titleElemContainer.style.display = "inline-block";
-    titleElemContainer.style.width = "calc(100% - 80px)";
-    titleElemContainer.style.verticalAlign = "top";
-    titleElemContainer.appendChild(titleElemSpanContainer);
-
-    const logoImageElem = document.createElement("img");
-    logoImageElem.src = logoImage;
-    logoImageElem.alt = 'Bluetickme';
-    logoImageElem.style.width = "60px";
-    logoImageElem.style.height = "60px";
-    logoImageElem.style.marginTop = "10px";
-    const logoElemContainer = document.createElement("div");
-    logoElemContainer.style.display = "inline-block";
-    logoElemContainer.style.width = "60px";
-    logoElemContainer.appendChild(logoImageElem);
-
-    rootContainer.append(logoElemContainer);
-    rootContainer.append(titleElemContainer);
-    rootContainer.append(closeButtonElemContainer);
-    rootContainer.append(agreeButtonElemContainer);
-    rootElem.append(rootContainer);
-    document.body.appendChild(rootElem);
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    renderNotificationPermissionPopup();
-});
+})();
