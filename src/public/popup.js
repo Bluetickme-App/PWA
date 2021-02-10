@@ -23,21 +23,6 @@
         const title = "Bluetickme, wants to send you notifications, do you agree?";
         const agreeButtonText = "Agree";
         const isMobile = isMobileAgent();
-        const windowWidth = window.innerWidth;
-        const RES = {
-            mobile: 'mobile',
-            tablet: 'tablet',
-            desktop: 'desktop',
-        };
-
-        let resolutionType; // tablet, mobile
-        if (windowWidth < 786) {
-            resolutionType = RES.mobile;
-        } else if (windowWidth >= 768 && windowWidth < 992) {
-            resolutionType = RES.tablet;
-        } else {
-            resolutionType = RES.desktop;
-        }
 
         if (allowedNotification) {
             return;
@@ -89,6 +74,7 @@
         #notification-container .close-button-container button {
             border: 0px;
             cursor: pointer;
+            font-size: 15px;
         }
 
         #notification-container .title-container {
@@ -137,12 +123,13 @@
             }
 
             #notification-container .title-container {
-                width: calc(100% - 170px);
-                max-width: calc(100% - 170px);
+                width: calc(100% - 100px);
+                max-width: calc(100% - 100px);
             }
             #notification-container .title-container span {
                 margin-top: 25px;
                 margin-left: 12px;
+                font-size: 12px;
             }
 
             #notification-container .close-button-container {
@@ -150,6 +137,15 @@
             }
             #notification-container .agree-button-container {
                 right: 0px;
+            }
+        }
+
+        @media screen and (max-width: 360px) {
+            #notification-container .logo-container img {
+                margin-top: 12px;
+            }
+            #notification-container .title-container span {
+                margin-top: 12px;
             }
         }
         `;
