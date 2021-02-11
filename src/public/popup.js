@@ -52,7 +52,7 @@
 
         #notification-container .agree-button-container {
             position: absolute;
-            right: 20px;
+            right: 0px;
             top: 50px;
         }
         #notification-container .agree-button-container button {
@@ -68,7 +68,7 @@
 
         #notification-container .close-button-container {
             position: absolute;
-            right: 20px;
+            right: 0px;
             top: 8px;
         }
         #notification-container .close-button-container button {
@@ -79,8 +79,9 @@
 
         #notification-container .title-container {
             display: inline-block;
-            width: calc(100% - 80px);
+            width: calc(100% - 160px);
             vertical-align: top;
+            text-align: center;
         }
         #notification-container .title-container > span {
             margin-top: 32px;
@@ -102,6 +103,17 @@
         @media screen and (max-width: 991px) {
             #notification-container .inner-container {
                 margin: 0 20px;
+            }
+
+            #notification-container .title-container {
+                width: calc(100% - 200px);
+            }
+
+            #notification-container .close-button-container {
+                right: 20px;
+            }
+            #notification-container .close-button-container {
+               right: 20px;
             }
         }
 
@@ -130,6 +142,7 @@
                 margin-top: 25px;
                 margin-left: 12px;
                 font-size: 12px;
+                text-align: left;
             }
 
             #notification-container .close-button-container {
