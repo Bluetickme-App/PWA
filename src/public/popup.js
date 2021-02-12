@@ -282,19 +282,20 @@
             return;
         }
 
-        const androidDownloadUrl = 'https://api.bluetickme.com';
+        const androidDownloadUrl = 'https://api.bluetickme.com/app.apk';
         const title = "Click \"Get App\" to Download BlueTickMe App!";
         const getAppButtonText = "Get App";
 
         const css = `
         #app-download-container {
             position: fixed;
-            bottom: 0px;
+            bottom: 47px;
             left: 0px;
             height: auto;
             width: 100%;
             background-color: rgb(255, 255, 255);
             border-top: 1px solid rgb(222, 222, 222);
+            border-bottom: 1px solid rgb(222, 222, 222);
             z-index: 100;
             visibility: hidden;
             opacity: 0;
