@@ -416,5 +416,8 @@
     document.addEventListener("DOMContentLoaded", function () {
         renderNotificationPermissionPopup();
         renderAppDownloadPopup();
+        if (window.ReactNativeWebView) {
+            alert("APP");
+        }
     });
 })();
