@@ -93,7 +93,7 @@
             width: 100%;
             background-color: rgb(255, 255, 255);
             border-bottom: 1px solid rgb(222, 222, 222);
-            z-index: 100;
+            z-index: 1000000;
         }
 
         #notification-container .inner-container {
@@ -296,7 +296,7 @@
             background-color: rgb(255, 255, 255);
             border-top: 1px solid rgb(222, 222, 222);
             border-bottom: 1px solid rgb(222, 222, 222);
-            z-index: 100;
+            z-index: 1000000;
             visibility: hidden;
             opacity: 0;
             transition: visibility 0s, opacity 0.8s linear;
