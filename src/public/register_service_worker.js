@@ -73,7 +73,7 @@ if ('serviceWorker' in navigator) {
                 }).then((response) => {
                     if (response.status === 200) {
                         response.json().then((data) => {
-                            setCookie('notification_registered', 'true');
+                            setCookie('web_push_subscription_registered', 'true');
                             setCookie('web_push_subscription_id', data.data.id);
                             window.close();
                         });
