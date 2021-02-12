@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "shx cp ./package.json ./dist/ && shx cp ./package-lock.json ./dist/ && shx cp -rf ./src/* ./dist/ && cd dist && npm install",
-    "start": "export NODE_EVN=production && cd dist && nodemon index.js",
+    "start": "cd dist && node index.js",
     "start:dev": "export NODE_EVN=development && cd src && nodemon --watch ../src index.js"
   },
   "author": "",
