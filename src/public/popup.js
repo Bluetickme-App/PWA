@@ -268,7 +268,152 @@
         document.body.appendChild(rootElem);
     }
 
+    function removeAppDownloadPopup() {
+        if (document.getElementById('app-download-container')) {
+            document.getElementById('app-download-container').remove();
+        }
+    }
+
+    function renderAppDownloadPopup() {
+        const isAndroid = /(android)/i.test(navigator.userAgent);
+        const isIOS = /(iPad)/i.test(navigator.userAgent) || /(iPhone)/i.test(navigator.userAgent) || /(iPod)/i.test(navigator.userAgent);
+        const isMobile = isMobileAgent();
+        if (!isMobile || !isAndroid) {
+            return;
+        }
+
+        const androidDownloadUrl = 'https://api.bluetickme.com';
+        const title = "Click \"Get App\" to Download BlueTickMe App!";
+        const getAppButtonText = "Get App";
+
+        const css = `
+        #app-download-container {
+            position: fixed;
+            bottom: 0px;
+            left: 0px;
+            height: auto;
+            width: 100%;
+            background-color: rgb(255, 255, 255);
+            border-top: 1px solid rgb(222, 222, 222);
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0s, opacity 0.8s linear;
+        }
+        #app-download-container.visible {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #app-download-container .inner-container {
+            margin: 15px 10px;
+            float: left;
+            width: calc(100% - 20px);
+        }
+
+        #app-download-container .close-button-container {
+            display: inline-block;
+        }
+
+        #app-download-container .title-container {
+            display: inline-block;
+            width: calc(100% - 130px);
+            text-align: center;
+            padding: 0 5px;
+            vertical-align: middle;
+        }
+
+        #app-download-container .get-app-button-container {
+            display: inline-block;
+            float: right;
+        }
+
+        #app-download-container .close-button-container button {
+            border: 0px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #app-download-container .title-container > span {
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        #app-download-container .get-app-button-container button {
+            color: rgb(255, 255, 255);
+            background-color: rgb(0, 138, 252);
+            border: 0px;
+            border-radius: 4px;
+            padding: 4px;
+            width: 100px;
+            height: 25px;
+            cursor: pointer;
+        }
+
+        @media screen and (max-width: 360px) {
+            #app-download-container .title-container {
+                width: calc(100% - 30px);
+            }
+
+            #app-download-container .get-app-button-container {
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
+        `;
+        addCssToDocument(css);
+
+        const rootElem = document.createElement("div");
+        rootElem.id = "app-download-container";
+
+        const rootContainer = document.createElement("div");
+        rootContainer.classList = 'inner-container';
+
+        const getAppButtonElem = document.createElement("button");
+        getAppButtonElem.innerHTML = getAppButtonText;
+
+        const getAppButtonElemContainer = document.createElement("div");
+        getAppButtonElemContainer.classList = 'get-app-button-container';
+        getAppButtonElemContainer.onclick = ((ev) => {
+            removeAppDownloadPopup();
+            window.location = androidDownloadUrl;
+        });
+        getAppButtonElemContainer.appendChild(getAppButtonElem);
+
+        const closeButtonElem = document.createElement("button");
+        closeButtonElem.innerHTML = 'x';
+        closeButtonElem.addEventListener("focus", function () {
+            this.style.border = "0";
+        });
+        const closeButtonElemContainer = document.createElement("div");
+        closeButtonElemContainer.classList = 'close-button-container';
+        closeButtonElemContainer.onclick = ((ev) => {
+            removeAppDownloadPopup();
+        });
+        closeButtonElemContainer.appendChild(closeButtonElem);
+
+        const titleElem = document.createTextNode(title);
+        const titleElemSpanContainer = document.createElement("span");
+        titleElemSpanContainer.appendChild(titleElem);
+        const titleElemContainer = document.createElement("div");
+        titleElemContainer.classList = 'title-container';
+        titleElemContainer.appendChild(titleElemSpanContainer);
+
+        rootContainer.append(closeButtonElemContainer);
+        rootContainer.append(titleElemContainer);
+        rootContainer.append(getAppButtonElemContainer);
+        rootElem.append(rootContainer);
+        document.body.appendChild(rootElem);
+
+        window.setTimeout(function () {
+            rootElem.classList.add('visible');
+        }, 350);
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
         renderNotificationPermissionPopup();
+        renderAppDownloadPopup();
     });
 })();
