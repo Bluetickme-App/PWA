@@ -42,10 +42,11 @@ const ctx = {
 
 const subscriptionService = new SubscriptionService(ctx);
 
-// Create a write stream (in append mode)
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/requests.log'), {flags: 'a'});
-// Setup the logger
-app.use(morgan('combined', {stream: accessLogStream}));
+// // Create a write stream (in append mode)
+// @TODO It does not work on google cloud as it can't create folders in read only env
+// const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs/requests.log'), {flags: 'a'});
+// // Setup the logger
+// app.use(morgan('combined', {stream: accessLogStream}));
 
 app.use(cors({
     origin: '*',
@@ -60,7 +61,7 @@ app.get('/api/vapid-public-key', function (req, res) {
     });
 });
 
-app.post('/api/web-push-register', async function (req, res) {
+app.post('/api/web-push-register', async function (req, res, next) {
     const subscription = req.body.subscription;
     logger.info("web-push-register api request body");
     logger.info(JSON.stringify(subscription));
@@ -73,7 +74,7 @@ app.post('/api/web-push-register', async function (req, res) {
         });
         res.header('Content-Type', 'application/json');
         res.send({
-            data: response,
+            data: response.data,
         });
 
         logger.info("web-push-register api response");
@@ -81,7 +82,7 @@ app.post('/api/web-push-register', async function (req, res) {
     } catch(error) {
         logger.error("web-push-register api error");
         logger.error(JSON.stringify(error));
-        throw error;
+        next(error);
     }
 });
 
@@ -138,7 +139,7 @@ app.use(function (err, req, res, next) {
         return next(err)
     }
     res.header('Content-Type', 'application/json');
-    res.status(500);
+    res.status(err.code || 500);
     res.send({
         error: err.message,
     });

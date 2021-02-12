@@ -1,5 +1,4 @@
 self.addEventListener('push', function (event) {
-    console.log("A BCCC DDD E E A")
     if (!event.data) return;
 
     const payload = JSON.parse(event.data.text());

@@ -19,10 +19,17 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 if ('serviceWorker' in navigator) {
+    function setCookie(name, value) {
+        document.cookie = `${name}=${value}; SameSite=Strict; domain=bluetickme.com; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
+    }
 
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service_worker.js').then(registration => {
             registration.onupdatefound = () => {
+                registration.update().then(() => {
+                    // window.location.reload();
+                });
+
                 const installingWorker = registration.installing;
                 installingWorker.onstatechange = () => {
                     if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
@@ -64,11 +71,16 @@ if ('serviceWorker' in navigator) {
                         subscription: subscription
                     }),
                 }).then((response) => {
-                    console.log(response);
-                    window.close();
-                }).catch(error => {
-                    console.log(error);
+                    if (response.status === 200) {
+                        response.json().then((data) => {
+                            setCookie('notification_registered', 'true');
+                            setCookie('web_push_subscription_id', data.data.id);
+                            window.close();
+                        });
+                    }
                 });
             });
     });
+} else {
+    console.log('serviceWorker not supported');
 }
