@@ -63,6 +63,7 @@
     }
 
     function renderNotificationPermissionPopup() {
+        console.log("COOKIE VALUE", getCookie('web_push_subscription_registered'));
         if (getCookie('web_push_subscription_registered') === 'true') {
             console.log("notifications are already registered!");
             return;
