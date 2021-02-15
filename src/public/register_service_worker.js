@@ -20,7 +20,7 @@ function urlBase64ToUint8Array(base64String) {
 
 if ('serviceWorker' in navigator) {
     function setCookie(name, value) {
-        document.cookie = `${name}=${value}; SameSite=Strict; domain=bluetickme.com; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
+        document.cookie = `${name}=${value}; domain=bluetickme.com; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
     }
 
     window.addEventListener('load', () => {
