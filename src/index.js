@@ -62,13 +62,14 @@ app.get('/api/vapid-public-key', function (req, res) {
 });
 
 app.post('/api/web-push-register', async function (req, res, next) {
+    const user_id = req.body.user_id;
     const subscription = req.body.subscription;
     logger.info("web-push-register api request body");
     logger.info(JSON.stringify(subscription));
 
     try {
         const response = await subscriptionService.storeSubscription({
-            user_id: null,
+            user_id: user_id || null,
             subscription,
             status: 'active',
         });

@@ -18,7 +18,11 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
-if ('serviceWorker' in navigator) {
+const url = new URL(window.location);
+const userId = url.searchParams.get('uid');
+const redirectUrl = url.searchParams.get('redirectUrl');
+
+if ('serviceWorker' in navigator && userId !== '') {
     function setCookie(name, value) {
         document.cookie = `${name}=${value}; domain=.bluetickme.com; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
     }
@@ -68,14 +72,15 @@ if ('serviceWorker' in navigator) {
                         'Content-type': 'application/json'
                     },
                     body: JSON.stringify({
-                        subscription: subscription
+                        subscription: subscription,
+                        user_id: userId,
                     }),
                 }).then((response) => {
                     if (response.status === 200) {
                         response.json().then((data) => {
                             setCookie('web_push_subscription_registered', 'true');
                             setCookie('web_push_subscription_id', data.data.id);
-                            window.close();
+                            window.location(redirectUrl);
                         });
                     }
                 });
