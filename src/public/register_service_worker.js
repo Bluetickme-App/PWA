@@ -80,7 +80,8 @@ if ('serviceWorker' in navigator && userId !== '') {
                         response.json().then((data) => {
                             setCookie('web_push_subscription_registered', 'true');
                             setCookie('web_push_subscription_id', data.data.id);
-                            window.location = redirectUrl;
+                            // window.location = redirectUrl;
+                            window.close();
                         });
                     }
                 });
