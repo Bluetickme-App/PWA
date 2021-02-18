@@ -21,8 +21,9 @@ function urlBase64ToUint8Array(base64String) {
 const url = new URL(window.location);
 const userId = url.searchParams.get('uid');
 const redirectUrl = url.searchParams.get('redirectUrl');
+console.log(userId);
 
-if ('serviceWorker' in navigator && userId !== '') {
+if ('serviceWorker' in navigator && userId !== '' && userId !== null) {
     function setCookie(name, value) {
         document.cookie = `${name}=${value}; domain=.bluetickme.com; expires=Fri, 31 Dec 2100 23:59:59 GMT`;
     }
@@ -89,4 +90,6 @@ if ('serviceWorker' in navigator && userId !== '') {
     });
 } else {
     console.log('serviceWorker not supported');
+    alert("Sorry! Your browser does not support push notification feature.");
+    window.close();
 }
