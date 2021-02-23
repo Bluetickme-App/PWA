@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>BlueTickMe Fingerprint Authentication</title>
+    <script src="domready.js"></script>
+    <script src="bundle.js"></script>
+    <script type="text/javascript">
+    let fingerPrintAuth;
+
+    function doesBrowserSupportAuth() {
+        return 'credentials' in navigator;
+    }
+
+    function init () {
+        console.log("INIT called")
+        // when a message is received from the page code
+        window.onmessage = (event) => {
+            console.log("onmessage", event);
+            // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
+            //     console.log("INVALID ORIGIN", event.origin);
+            //     return;
+            // }
+
+            if (event.data) {
+                console.log("HTML Code Element received a message!", JSON.parse(event.data));
+                if (typeof fingerPrintAuth === 'function') {
+                    fingerPrintAuth(event.data);
+                } else {
+                    const intervalId = setInterval(() => {
+                        if (typeof fingerPrintAuth === 'function') {
+                            clearInterval(intervalId);
+                            fingerPrintAuth(event.data);
+                        }
+                    }, 100);
+                }
+            }
+        }
+
+        // console.log("ABC")
+        // window.postMessage(JSON.stringify({
+        //     challenge: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
+        //     publicKey: 'AXNePBgAuQ0MydvWDPeqFsNZ2byFyzuA-Znkkjpj1n9PthMKKeKbhGllMeAQcoir'
+        // }));
+    }
+
+    DomReady.ready(function() {
+        const base64urlEncode = encode;
+        const base64urlDecode = decode;
+        const getAttestation = (publicKey, challenge) =>  {
+            return navigator.credentials.get({
+                publicKey: {
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        userVerification: "required"
+                    },
+                    // challenge: toBuffer(base64urlDecode(challenge)),
+                    challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
+                    rpId: document.domain,
+                    // rp: {
+                    //     id: document.domain,
+                    //     name: "Bluetickme",
+                    // },
+                    allowCredentials: [
+                        {
+                            type: "public-key",
+                            id: Uint8Array.from(publicKey, c => c.charCodeAt(0)),
+                        }
+                    ],
+                    userVerification: "required",
+                    timeout: 60000,
+                }
+            });
+        };
+
+        function publicKeyCredentialToJSON(pubKeyCred) {
+            if (pubKeyCred instanceof ArrayBuffer) {
+                return base64urlEncode(pubKeyCred);
+            } else if (pubKeyCred instanceof Array) {
+                return pubKeyCred.map(publicKeyCredentialToJSON);
+            } else if (pubKeyCred instanceof Object) {
+                const obj = {};
+                for (let key in pubKeyCred) {
+                    obj[key] = publicKeyCredentialToJSON(pubKeyCred[key]);
+                }
+                return obj;
+            } else return pubKeyCred;
+        }
+
+        fingerPrintAuth = async (message) => {
+            const messageObject = JSON.parse(message);
+            const attestation = await getAttestation(messageObject.publicKey, messageObject.challenge);
+            const webAuthnAssertion = publicKeyCredentialToJSON(attestation);
+            window.parent.postMessage(JSON.stringify(webAuthnAssertion));
+            console.log(webAuthnAssertion);
+        };
+    });
+    </script>
+</head>
+
+<body onload="init();">
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>BlueTickMe Fingerprint Authentication</title>
+    <script src="domready.js"></script>
+    <script src="bundle.js"></script>
+    <script type="text/javascript">
+    let getFingerPrintAuth;
+
+    function doesBrowserSupportAuth() {
+        return 'credentials' in navigator;
+    }
+
+    function init () {
+        // when a message is received from the page code
+        window.onmessage = (event) => {
+            console.log("onmessage", event);
+            // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
+            //     console.log("INVALID ORIGIN", event.origin);
+            //     return;
+            // }
+
+            if (event.data) {
+                console.log("HTML Code Element received a message!", JSON.parse(event.data));
+                if (typeof getFingerPrintAuth === 'function') {
+                    getFingerPrintAuth(event.data);
+                } else {
+                    const intervalId = setInterval(() => {
+                        if (typeof getFingerPrintAuth === 'function') {
+                            clearInterval(intervalId);
+                            getFingerPrintAuth(event.data);
+                        }
+                    }, 100);
+                }
+            }
+        }
+    }
+
+    DomReady.ready(function() {
+        if (!doesBrowserSupportAuth()) {
+            const message = {
+                error: 'FINGERPRINT_NOT_SUPPORTED',
+            };
+            window.parent.postMessage(JSON.stringify(message));
+        }
+
+        const base64urlEncode = encode;
+        const base64urlDecode = decode;
+        const getAttestation = (user, challenge) =>  {
+            return navigator.credentials.create({
+                publicKey: {
+                    authenticatorSelection: {
+                        authenticatorAttachment: "platform",
+                        userVerification: "required"
+                    },
+                    challenge: toBuffer(base64urlDecode(challenge)),
+                    rp: {
+                        id: document.domain,
+                        name: "Bluetickme",
+                    },
+                    user: {
+                        id: toBuffer(base64urlDecode(user.id)),
+                        name: user.name,
+                        displayName: user.displayName,
+                    },
+                    pubKeyCredParams: [
+                        { type: "public-key", alg: -7 },
+                        { type: "public-key", alg: -257 }
+                    ]
+                }
+            });
+        };
+
+        function publicKeyCredentialToJSON(pubKeyCred) {
+            if (pubKeyCred instanceof ArrayBuffer) {
+                return base64urlEncode(pubKeyCred);
+            } else if (pubKeyCred instanceof Array) {
+                return pubKeyCred.map(publicKeyCredentialToJSON);
+            } else if (pubKeyCred instanceof Object) {
+                const obj = {};
+                for (let key in pubKeyCred) {
+                    obj[key] = publicKeyCredentialToJSON(pubKeyCred[key]);
+                }
+                return obj;
+            } else return pubKeyCred;
+        }
+
+        getFingerPrintAuth = async (message) => {
+            const messageObject = JSON.parse(message);
+            if (!messageObject.challenge || !messageObject.user) {
+                console.log("INVALID DATA");
+                return;
+            }
+
+            navigator.credentials.preventSilentAccess();
+            const attestation = await getAttestation(messageObject.user, messageObject.challenge);
+            console.log(base64urlEncode(attestation.response.getPublicKey()));
+            const webAuthnAttestation = publicKeyCredentialToJSON(attestation);
+            window.parent.postMessage(JSON.stringify(webAuthnAttestation));
+            console.log(JSON.stringify(webAuthnAttestation));
+        };
+
+        // getFingerPrintAuth(JSON.stringify({
+        //     challenge: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
+        //     user: {
+        //         id: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
+        //         name: 'Onkar',
+        //         displayName: 'Onkar',
+        //     },
+        // }));
+    });
+    </script>
+</head>
+
+<body onload="init();">
+</body>
+</html>
