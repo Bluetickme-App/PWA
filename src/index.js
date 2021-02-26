@@ -10,7 +10,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const {HttpAgent, logger} = require('./helpers');
-const {SubscriptionService} = require('./services');
+const {SubscriptionService, CryptoService} = require('./services');
 const {checkHeader} = require('./middlewares');
 
 const port = config.get('app.port');
@@ -41,6 +41,7 @@ const ctx = {
 };
 
 const subscriptionService = new SubscriptionService(ctx);
+const cryptoService = new CryptoService(ctx);
 
 // // Create a write stream (in append mode)
 // @TODO It does not work on google cloud as it can't create folders in read only env
@@ -59,6 +60,23 @@ app.get('/api/vapid-public-key', function (req, res) {
     res.send({
         vapid_public_key: vapid_public_key
     });
+});
+
+app.post('/crypto/verify-signature', async function (req, res, next) {
+    const counter = req.body.counter;
+    const attestationObject = req.body.attestation_object;
+    const clientDataJSON = req.body.client_data_json;
+    const authenticatorData = req.body.authenticator_data;
+    const signature = req.body.signature;
+    const response = cryptoService.verifyAssertion({
+        counter,
+        attestationObject,
+        clientDataJSON,
+        authenticatorData,
+        signature,
+    });
+    res.header('Content-Type', 'application/json');
+    res.send(response);
 });
 
 app.post('/api/web-push-register', async function (req, res, next) {
