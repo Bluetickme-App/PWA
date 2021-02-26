@@ -62,7 +62,7 @@ app.get('/api/vapid-public-key', function (req, res) {
     });
 });
 
-app.post('/crypto/verify-signature', checkHeader, async function (req, res, next) {
+app.post('/api/crypto/verify-signature', checkHeader, async function (req, res, next) {
     try {
         const counter = req.body.counter;
         const attestationObject = req.body.attestation_object;
