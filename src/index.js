@@ -62,21 +62,30 @@ app.get('/api/vapid-public-key', function (req, res) {
     });
 });
 
-app.post('/crypto/verify-signature', async function (req, res, next) {
-    const counter = req.body.counter;
-    const attestationObject = req.body.attestation_object;
-    const clientDataJSON = req.body.client_data_json;
-    const authenticatorData = req.body.authenticator_data;
-    const signature = req.body.signature;
-    const response = cryptoService.verifyAssertion({
-        counter,
-        attestationObject,
-        clientDataJSON,
-        authenticatorData,
-        signature,
-    });
-    res.header('Content-Type', 'application/json');
-    res.send(response);
+app.post('/crypto/verify-signature', checkHeader, async function (req, res, next) {
+    try {
+        const counter = req.body.counter;
+        const attestationObject = req.body.attestation_object;
+        const clientDataJSON = req.body.client_data_json;
+        const authenticatorData = req.body.authenticator_data;
+        const signature = req.body.signature;
+        const response = cryptoService.verifyAssertion({
+            counter,
+            attestationObject,
+            clientDataJSON,
+            authenticatorData,
+            signature,
+        });
+        res.header('Content-Type', 'application/json');
+        res.send(response);
+    } catch (err) {
+        logger.error(err);
+        res.header('Content-Type', 'application/json');
+        res.send({
+            verified: false,
+            counter: 0,
+        });
+    }
 });
 
 app.post('/api/web-push-register', async function (req, res, next) {
