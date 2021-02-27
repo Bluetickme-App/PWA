@@ -161,8 +161,26 @@ function verifyAssertion(params) {
 }
 
 class CryptoService {
+    constructor(ctx) {
+        this.blueTickMeAgent = ctx.httpAgents.blueTickMeAgent;
+    }
+
     verifyAssertion(params) {
         return verifyAssertion(params);
+    }
+
+    singInUsingFingerprintAuth(params) {
+        return this.blueTickMeAgent.post('/singInUsingFingerprintAuth', params)
+            .then((response) => {
+                return response.data;
+            });
+    }
+
+    saveFingerprintAuthPublicKey(params) {
+        return this.blueTickMeAgent.post('/saveFingerprintAuthPublicKey', params)
+            .then((response) => {
+                return response.data;
+            });
     }
 }
 

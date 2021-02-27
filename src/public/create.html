@@ -42,6 +42,7 @@
     DomReady.ready(function() {
         if (!doesBrowserSupportAuth()) {
             alert("Fingerprint not supported by your browser.");
+            window.close();
             return;
         }
 
@@ -54,6 +55,7 @@
 
         if (!deviceId || !userId || !userName || !userDisplayName || !challenge) {
             console.log("Invalid url query params");
+            window.close();
             return;
         }
 
@@ -116,13 +118,14 @@
                 attestation_object: webAuthnAttestation.response.attestationObject,
                 client_data_json: webAuthnAttestation.response.clientDataJSON,
             };
-            const response = await fetch("https://www.bluetickme.com/_functions/saveFingerprintAuthPublicKey", {
+            const response = await fetch("/api/save-fingerprint-auth-key", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(input),
             });
             const jsonResponse = JSON.parse(await response.text());
             console.log("jsonResponse", jsonResponse);
+            window.close();
         };
 
         getFingerPrintAuth(deviceId, {

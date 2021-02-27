@@ -13,6 +13,14 @@ const {HttpAgent, logger} = require('./helpers');
 const {SubscriptionService, CryptoService} = require('./services');
 const {checkHeader} = require('./middlewares');
 
+class HttpError extends Error {
+    constructor(params) {
+        super(params.message);
+        this.code = params.code;
+        this.message = params.message;
+    }
+}
+
 const port = config.get('app.port');
 
 // const vapidKeys = webPush.generateVAPIDKeys();
@@ -85,6 +93,26 @@ app.post('/api/crypto/verify-signature', checkHeader, async function (req, res, 
             verified: false,
             counter: 0,
         });
+    }
+});
+
+app.post('/api/save-fingerprint-auth-key', async function (req, res, next) {
+    try {
+        const response = await cryptoService.saveFingerprintAuthPublicKey(req.body);
+        res.header('Content-Type', 'application/json');
+        res.send(response);
+    } catch (err) {
+        next(new HttpError({code: err.response.status, message: err.response.data.error}));
+    }
+});
+
+app.post('/api/fingerprint-sign-in', async function (req, res, next) {
+    try {
+        const response = await cryptoService.singInUsingFingerprintAuth(req.body);
+        res.header('Content-Type', 'application/json');
+        res.send(response);
+    } catch (err) {
+        next(new HttpError({code: err.response.status, message: err.response.data.error}));
     }
 });
 
