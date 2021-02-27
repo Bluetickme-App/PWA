@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>BlueTickMe Fingerprint Authentication</title>
     <script src="domready.js"></script>
-    <script src="bundle.js"></script>
+    <script src="base64url-arraybuffer.js"></script>
     <script type="text/javascript">
     let getFingerPrintAuth;
 
@@ -13,55 +13,67 @@
         return 'credentials' in navigator;
     }
 
-    function init () {
-        // when a message is received from the page code
-        window.onmessage = (event) => {
-            console.log("onmessage", event);
-            // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
-            //     console.log("INVALID ORIGIN", event.origin);
-            //     return;
-            // }
+    // function init () {
+    //     // when a message is received from the page code
+    //     window.onmessage = (event) => {
+    //         return;
+    //         console.log("onmessage", event);
+    //         // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
+    //         //     console.log("INVALID ORIGIN", event.origin);
+    //         //     return;
+    //         // }
 
-            if (event.data) {
-                console.log("HTML Code Element received a message!", JSON.parse(event.data));
-                if (typeof getFingerPrintAuth === 'function') {
-                    getFingerPrintAuth(event.data);
-                } else {
-                    const intervalId = setInterval(() => {
-                        if (typeof getFingerPrintAuth === 'function') {
-                            clearInterval(intervalId);
-                            getFingerPrintAuth(event.data);
-                        }
-                    }, 100);
-                }
-            }
-        }
-    }
+    //         if (event.data) {
+    //             console.log("HTML Code Element received a message!", JSON.parse(event.data));
+    //             if (typeof getFingerPrintAuth === 'function') {
+    //                 getFingerPrintAuth(event.data);
+    //             } else {
+    //                 const intervalId = setInterval(() => {
+    //                     if (typeof getFingerPrintAuth === 'function') {
+    //                         clearInterval(intervalId);
+    //                         getFingerPrintAuth(event.data);
+    //                     }
+    //                 }, 100);
+    //             }
+    //         }
+    //     }
+    // }
 
     DomReady.ready(function() {
         if (!doesBrowserSupportAuth()) {
-            const message = {
-                error: 'FINGERPRINT_NOT_SUPPORTED',
-            };
-            window.parent.postMessage(JSON.stringify(message));
+            alert("Fingerprint not supported by your browser.");
+            return;
         }
 
-        const base64urlEncode = encode;
-        const base64urlDecode = decode;
+        const url = new URL(window.location);
+        const deviceId = url.searchParams.get('did');
+        const userId = url.searchParams.get('uid');
+        const userName = url.searchParams.get('un');
+        const userDisplayName = url.searchParams.get('udn');
+        const challenge = url.searchParams.get('c');
+
+        if (!deviceId || !userId || !userName || !userDisplayName || !challenge) {
+            console.log("Invalid url query params");
+            return;
+        }
+
+        const base64urlEncode = base64url.encode;
+        const base64urlDecode = base64url.decode;
         const getAttestation = (user, challenge) =>  {
             return navigator.credentials.create({
                 publicKey: {
                     authenticatorSelection: {
+                        // cross-platform / platform
                         authenticatorAttachment: "platform",
                         userVerification: "required"
                     },
-                    challenge: toBuffer(base64urlDecode(challenge)),
+                    challenge: base64urlDecode(challenge),
                     rp: {
-                        // id: document.domain,
+                        id: document.domain,
                         name: "Bluetickme",
                     },
                     user: {
-                        id: toBuffer(base64urlDecode(user.id)),
+                        id: base64urlDecode(user.id),
                         name: user.name,
                         displayName: user.displayName,
                     },
@@ -87,8 +99,8 @@
             } else return pubKeyCred;
         }
 
-        getFingerPrintAuth = async (message) => {
-            const messageObject = JSON.parse(message);
+        getFingerPrintAuth = async (deviceId, message) => {
+            const messageObject = message;
             if (!messageObject.challenge || !messageObject.user) {
                 console.log("INVALID DATA");
                 return;
@@ -96,24 +108,35 @@
 
             navigator.credentials.preventSilentAccess();
             const attestation = await getAttestation(messageObject.user, messageObject.challenge);
-            console.log(base64urlEncode(attestation.response.getPublicKey()));
             const webAuthnAttestation = publicKeyCredentialToJSON(attestation);
-            window.parent.postMessage(JSON.stringify(webAuthnAttestation));
-            console.log(JSON.stringify(webAuthnAttestation));
+            const input = {
+                device_id: deviceId,
+                public_key: webAuthnAttestation.id,
+                type: webAuthnAttestation.type,
+                attestation_object: webAuthnAttestation.response.attestationObject,
+                client_data_json: webAuthnAttestation.response.clientDataJSON,
+            };
+            const response = await fetch("https://www.bluetickme.com/_functions/saveFingerprintAuthPublicKey", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            });
+            const jsonResponse = JSON.parse(await response.text());
+            console.log("jsonResponse", jsonResponse);
         };
 
-        // getFingerPrintAuth(JSON.stringify({
-        //     challenge: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
-        //     user: {
-        //         id: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
-        //         name: 'Onkar',
-        //         displayName: 'Onkar',
-        //     },
-        // }));
+        getFingerPrintAuth(deviceId, {
+            challenge: challenge,
+            user: {
+                id: userId,
+                name: userName,
+                displayName: userDisplayName,
+            },
+        });
     });
     </script>
 </head>
 
-<body onload="init();">
+<body>
 </body>
 </html>

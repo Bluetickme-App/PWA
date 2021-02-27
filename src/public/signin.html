@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>BlueTickMe Fingerprint Authentication</title>
     <script src="domready.js"></script>
-    <script src="bundle.js"></script>
+    <script src="base64url-arraybuffer.js"></script>
     <script type="text/javascript">
     let fingerPrintAuth;
 
@@ -13,41 +13,56 @@
         return 'credentials' in navigator;
     }
 
-    function init () {
-        console.log("INIT called")
-        // when a message is received from the page code
-        window.onmessage = (event) => {
-            console.log("onmessage", event);
-            // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
-            //     console.log("INVALID ORIGIN", event.origin);
-            //     return;
-            // }
+    // function init () {
+    //     console.log("INIT called")
+    //     // when a message is received from the page code
+    //     window.onmessage = (event) => {
+    //         console.log("onmessage", event);
+    //         // if (event.origin !== 'https://www.bluetickme.com' && event.origin !== 'https://bluetickme.com') {
+    //         //     console.log("INVALID ORIGIN", event.origin);
+    //         //     return;
+    //         // }
 
-            if (event.data) {
-                console.log("HTML Code Element received a message!", JSON.parse(event.data));
-                if (typeof fingerPrintAuth === 'function') {
-                    fingerPrintAuth(event.data);
-                } else {
-                    const intervalId = setInterval(() => {
-                        if (typeof fingerPrintAuth === 'function') {
-                            clearInterval(intervalId);
-                            fingerPrintAuth(event.data);
-                        }
-                    }, 100);
-                }
-            }
-        }
+    //         if (event.data) {
+    //             console.log("HTML Code Element received a message!", JSON.parse(event.data));
+    //             if (typeof fingerPrintAuth === 'function') {
+    //                 fingerPrintAuth(event.data);
+    //             } else {
+    //                 const intervalId = setInterval(() => {
+    //                     if (typeof fingerPrintAuth === 'function') {
+    //                         clearInterval(intervalId);
+    //                         fingerPrintAuth(event.data);
+    //                     }
+    //                 }, 100);
+    //             }
+    //         }
+    //     }
 
-        // console.log("ABC")
-        // window.postMessage(JSON.stringify({
-        //     challenge: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
-        //     publicKey: 'AXNePBgAuQ0MydvWDPeqFsNZ2byFyzuA-Znkkjpj1n9PthMKKeKbhGllMeAQcoir'
-        // }));
-    }
+    //     // console.log("ABC")
+    //     // window.postMessage(JSON.stringify({
+    //     //     challenge: 'e21d109e-2eec-41a7-9c2e-ed60a959b7bb',
+    //     //     publicKey: 'AXNePBgAuQ0MydvWDPeqFsNZ2byFyzuA-Znkkjpj1n9PthMKKeKbhGllMeAQcoir'
+    //     // }));
+    // }
 
     DomReady.ready(function() {
-        const base64urlEncode = encode;
-        const base64urlDecode = decode;
+        if (!doesBrowserSupportAuth()) {
+            alert("Fingerprint not supported by your browser.");
+            return;
+        }
+
+        const url = new URL(window.location);
+        const deviceId = url.searchParams.get('did');
+        const publicKey = url.searchParams.get('p');
+        const challenge = url.searchParams.get('c');
+
+        if (!deviceId || !publicKey || !challenge) {
+            console.log("Invalid url query params");
+            return;
+        }
+
+        const base64urlEncode = base64url.encode;
+        const base64urlDecode = base64url.decode;
         const getAttestation = (publicKey, challenge) =>  {
             return navigator.credentials.get({
                 publicKey: {
@@ -55,17 +70,12 @@
                         authenticatorAttachment: "platform",
                         userVerification: "required"
                     },
-                    // challenge: toBuffer(base64urlDecode(challenge)),
-                    challenge: Uint8Array.from(challenge, c => c.charCodeAt(0)),
+                    challenge: base64urlDecode(challenge),
                     rpId: document.domain,
-                    // rp: {
-                    //     id: document.domain,
-                    //     name: "Bluetickme",
-                    // },
                     allowCredentials: [
                         {
                             type: "public-key",
-                            id: Uint8Array.from(publicKey, c => c.charCodeAt(0)),
+                            id: base64urlDecode(publicKey),
                         }
                     ],
                     userVerification: "required",
@@ -88,17 +98,38 @@
             } else return pubKeyCred;
         }
 
-        fingerPrintAuth = async (message) => {
-            const messageObject = JSON.parse(message);
+        fingerPrintAuth = async (deviceId, message) => {
+            const messageObject = message;
             const attestation = await getAttestation(messageObject.publicKey, messageObject.challenge);
             const webAuthnAssertion = publicKeyCredentialToJSON(attestation);
-            window.parent.postMessage(JSON.stringify(webAuthnAssertion));
-            console.log(webAuthnAssertion);
+
+            const input = {
+                device_id: deviceId,
+                public_key: webAuthnAssertion.id,
+                type: webAuthnAssertion.type,
+                authenticator_data: webAuthnAssertion.response.authenticatorData,
+                client_data_json: webAuthnAssertion.response.clientDataJSON,
+                signature: webAuthnAssertion.response.signature,
+		        user_handle: webAuthnAssertion.response.userHandle,
+            };
+
+            const response = await fetch("https://www.bluetickme.com/_functions/singInUsingFingerprintAuth", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(input),
+            });
+            const jsonResponse = JSON.parse(await response.text());
+            console.log("jsonResponse", jsonResponse);
         };
+
+        fingerPrintAuth(deviceId, {
+            challenge,
+            publicKey,
+        });
     });
     </script>
 </head>
 
-<body onload="init();">
+<body>
 </body>
 </html>
