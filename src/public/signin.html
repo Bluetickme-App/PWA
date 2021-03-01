@@ -45,6 +45,14 @@
     //     // }));
     // }
 
+    function signIn(input) {
+        return fetch("/api/fingerprint-sign-in", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input),
+        });
+    }
+
     DomReady.ready(function() {
         if (!doesBrowserSupportAuth()) {
             alert("Fingerprint not supported by your browser.");
@@ -102,27 +110,28 @@
 
         fingerPrintAuth = async (deviceId, message) => {
             const messageObject = message;
-            const attestation = await getAttestation(messageObject.publicKey, messageObject.challenge);
-            const webAuthnAssertion = publicKeyCredentialToJSON(attestation);
+            try {
+                const attestation = await getAttestation(messageObject.publicKey, messageObject.challenge);
+                const webAuthnAssertion = publicKeyCredentialToJSON(attestation);
 
-            const input = {
-                device_id: deviceId,
-                public_key: webAuthnAssertion.id,
-                type: webAuthnAssertion.type,
-                authenticator_data: webAuthnAssertion.response.authenticatorData,
-                client_data_json: webAuthnAssertion.response.clientDataJSON,
-                signature: webAuthnAssertion.response.signature,
-		        user_handle: webAuthnAssertion.response.userHandle,
-            };
+                const input = {
+                    device_id: deviceId,
+                    public_key: webAuthnAssertion.id,
+                    type: webAuthnAssertion.type,
+                    authenticator_data: webAuthnAssertion.response.authenticatorData,
+                    client_data_json: webAuthnAssertion.response.clientDataJSON,
+                    signature: webAuthnAssertion.response.signature,
+                    user_handle: webAuthnAssertion.response.userHandle,
+                };
 
-            const response = await fetch("/api/fingerprint-sign-in", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(input),
-            });
-            const jsonResponse = JSON.parse(await response.text());
-            console.log("jsonResponse", jsonResponse);
-            window.close();
+                const response = await signIn(input);
+                const jsonResponse = JSON.parse(await response.text());
+                console.log("jsonResponse", jsonResponse);
+                window.close();
+            } catch (error) {
+                alert(error.message);
+                window.close();
+            }
         };
 
         fingerPrintAuth(deviceId, {

@@ -39,6 +39,14 @@
     //     }
     // }
 
+    function saveFPAuthKey(input) {
+        return fetch("/api/save-fingerprint-auth-key", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(input),
+        });
+    }
+
     DomReady.ready(function() {
         if (!doesBrowserSupportAuth()) {
             alert("Fingerprint not supported by your browser.");
@@ -109,23 +117,24 @@
             }
 
             navigator.credentials.preventSilentAccess();
-            const attestation = await getAttestation(messageObject.user, messageObject.challenge);
-            const webAuthnAttestation = publicKeyCredentialToJSON(attestation);
-            const input = {
-                device_id: deviceId,
-                public_key: webAuthnAttestation.id,
-                type: webAuthnAttestation.type,
-                attestation_object: webAuthnAttestation.response.attestationObject,
-                client_data_json: webAuthnAttestation.response.clientDataJSON,
-            };
-            const response = await fetch("/api/save-fingerprint-auth-key", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(input),
-            });
-            const jsonResponse = JSON.parse(await response.text());
-            console.log("jsonResponse", jsonResponse);
-            window.close();
+            try {
+                const attestation = await getAttestation(messageObject.user, messageObject.challenge);
+                const webAuthnAttestation = publicKeyCredentialToJSON(attestation);
+                const input = {
+                    device_id: deviceId,
+                    public_key: webAuthnAttestation.id,
+                    type: webAuthnAttestation.type,
+                    attestation_object: webAuthnAttestation.response.attestationObject,
+                    client_data_json: webAuthnAttestation.response.clientDataJSON,
+                };
+                const response = await saveFPAuthKey(input);
+                const jsonResponse = JSON.parse(await response.text());
+                console.log("jsonResponse", jsonResponse);
+                window.close();
+            } catch (error) {
+                alert(error.message);
+                window.close();
+            }
         };
 
         getFingerPrintAuth(deviceId, {
