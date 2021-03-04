@@ -2,8 +2,9 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <title>BlueTickMe Fingerprint Authentication</title>
+    <title>Initializing Bluetickme Smart Login Access...</title>
     <script src="domready.js"></script>
     <script src="base64url-arraybuffer.js"></script>
     <script type="text/javascript">
@@ -141,6 +142,10 @@
     });
     </script>
     <style>
+    @font-face {
+        font-family: ProximaNova;
+        src: url("font/proxima_ssv/ProximaNova-Regular.otf");
+    }
     html, body {
         height:100%;
     }
@@ -149,18 +154,34 @@
         width:100%;
     }
     body {
+        font-family: ProximaNova;
         display:table-cell;
         text-align:center;
         vertical-align:middle;
+        background-color: #141414;
     }
+
+    img {
+        width: 200px;
+        margin-top: -100px;
+    }
+
     h1 {
         margin: 0 20px;
-        font-size: 30px;
+        font-size: 20px;
         font-weight: normal;
+        color: #fff;
+    }
+
+    @media (max-width: 785px) {
+        h1 {
+            font-size: 15px;
+        }
     }
     </style>
 </head>
 <body>
-    <h1>Please be patient this page will redirect back within 10 seconds</h1>
+    <img src="images/fingerprint.gif" width="200px" />
+    <h1>Initializing Bluetickme Smart Login Access...</h1>
 </body>
 </html>
