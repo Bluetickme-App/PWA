@@ -98,7 +98,10 @@ app.post('/api/crypto/verify-signature', checkHeader, async function (req, res, 
 
 app.post('/api/save-fingerprint-auth-key', async function (req, res, next) {
     try {
-        const response = await cryptoService.saveFingerprintAuthPublicKey(req.body);
+        const response = await cryptoService.saveFingerprintAuthPublicKey({
+            ...req.body,
+            user_agent: req.get('User-Agent'),
+        });
         res.header('Content-Type', 'application/json');
         res.send(response);
     } catch (err) {
@@ -108,7 +111,10 @@ app.post('/api/save-fingerprint-auth-key', async function (req, res, next) {
 
 app.post('/api/fingerprint-sign-in', async function (req, res, next) {
     try {
-        const response = await cryptoService.singInUsingFingerprintAuth(req.body);
+        const response = await cryptoService.singInUsingFingerprintAuth({
+            ...req.body,
+            user_agent: req.get('User-Agent'),
+        });
         res.header('Content-Type', 'application/json');
         res.send(response);
     } catch (err) {
